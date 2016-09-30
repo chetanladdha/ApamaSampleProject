@@ -36,7 +36,7 @@ monitor simplePrint {
 			send Tick(t.name, t.price) to "output";
 		}
 		
-		on all wait (2.0) {
+		on all wait (5.0) {
 			print "Hello World!";
 		}
 	} 
