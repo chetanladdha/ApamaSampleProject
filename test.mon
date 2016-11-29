@@ -1,0 +1,57 @@
+using com.apama.aggregates.max;
+
+aggregate bounded Agg_min(float i) returns float
+{
+	sequence<float> minv;
+	integer count;
+	action init()
+	{
+		minv := [];
+	}
+	action add(float i)
+	{
+		
+		minv.append(i);
+		count := count + 1;
+	}
+	action remove(float i)
+	{
+		integer c := 0;
+		while c < minv.size() {
+			if minv[c] = i then {
+				minv.remove(c);
+			}
+			c := c + 1;
+		}
+		count := count - 1;
+	}
+	action value() returns float
+	{
+		if (0 = count) then {
+			return float.NAN;
+			}
+		float m := float.NAN;
+		float f;
+		for f in minv {
+			if m.isNaN() or m > f then {
+				m := f;
+			}
+		}
+		return m;
+	}
+}
+
+event A {
+	float i;
+}
+
+monitor AggregateProjectionMisuse4 {
+	
+	action onload() {
+		A a1;
+		from a in all A() select A(max(a.i)): a1{print a1.toString();}
+		from a in all A() select A(Agg_min(a.i)) : a1 {
+			print a1.toString();
+		}
+	}
+}
